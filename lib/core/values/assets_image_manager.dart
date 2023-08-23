@@ -1,3 +1,3 @@
 class AssetsImageManager {
-  static const String categoryList = 'assets/jsons/category_list.json';
+  static const String taskImage = 'assets/jsons/category_list.json';
 }

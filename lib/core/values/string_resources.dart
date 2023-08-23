@@ -1,4 +1,15 @@
 class StringResources {
-  static String imageAWSbaseUrl =
-      "https://jobxprss-media.s3.us-east-2.amazonaws.com";
+  static String addTask = "Add Task";
+  static String editTask = "Edit Task";
+  static String taskName = "Task Name";
+  static String taskTitle = "Task Title";
+  static String taskDescription = "Task Description";
+  static String completeStatus = "Complete Status";
+  static String submit = "Submit";
+  static String delete = "Delete";
+  static String task = "Task";
+  static String edit = "Edit";
+
+  static String search = "Search";
+
 }

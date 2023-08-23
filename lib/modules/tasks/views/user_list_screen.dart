@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:untitled4/core/values/color_manager.dart';
-import 'package:untitled4/modules/users/views/widgets/user_list_tile.dart';
-
+import 'package:untitled4/modules/tasks/views/widgets/user_list_tile.dart';
+import '../../../core/values/string_resources.dart';
 import '../../../core/widgets/common_text_field.dart';
+import '../repositories.dart';
+import 'add_new_user_screen.dart';
 
 class UserListScreen extends StatefulWidget {
   const UserListScreen({Key? key}) : super(key: key);
@@ -12,11 +14,21 @@ class UserListScreen extends StatefulWidget {
 }
 
 class _UserListScreenState extends State<UserListScreen> {
+  TaskRepository taskRepository = TaskRepository();
   bool isSearch = false;
   double screenHeight = 0;
   double screenWidth = 0;
 
   bool startAnimation = false;
+  bool startAnimationSearch = false;
+
+  bool _isExpanded = false;
+
+  void _toggleSearchBar() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+    });
+  }
 
   List<String> texts = [
     "Monetization",
@@ -73,6 +85,7 @@ class _UserListScreenState extends State<UserListScreen> {
         startAnimation = true;
       });
     });
+    taskRepository.getCompanyFromServer();
   }
 
   @override
@@ -94,9 +107,6 @@ class _UserListScreenState extends State<UserListScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 0),
         child: Column(
           children: [
-            const SizedBox(
-              height: 30,
-            ),
             ListView.builder(
               primary: false,
               shrinkWrap: true,
@@ -136,59 +146,57 @@ class _UserListScreenState extends State<UserListScreen> {
 
   PreferredSizeWidget appbar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: ColorManager.whiteColor,
       elevation: 0,
-      leading: isSearch
+      title: _isExpanded
           ? null
-          : IconButton(
-              icon: Icon(Icons.menu_rounded, color: ColorManager.grayColor),
-              onPressed: () {},
-            ),
-      title: isSearch
-          ? AnimatedContainer(
-              width: screenWidth,
-              curve: Curves.easeInOut,
-              duration: const Duration(milliseconds: 500),
-              transform: Matrix4.translationValues(
-                  startAnimation ? 0 : screenWidth, 0, 0),
-              margin: const EdgeInsets.only(
-                bottom: 12,
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth / 40,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: CommonTextField(
-                obscureText: false,
-                isLabel: false,
-                prefixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    isSearch = false;
-                    setState(() {});
-                  },
-                ),
-              ),
-            )
           : Text(
-              "Users",
+              StringResources.task,
               style: TextStyle(
                 color: ColorManager.grayColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
       actions: [
-        isSearch
-            ? const SizedBox()
-            : IconButton(
-                onPressed: () {
-                  isSearch = true;
-                  setState(() {});
-                },
-                icon: Icon(Icons.search, color: ColorManager.grayColor),
-              )
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 500),
+          width: _isExpanded ? screenWidth : 0.0,
+          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+          margin: const EdgeInsets.symmetric(vertical: 5),
+          child: _isExpanded
+              ? Container(
+                  decoration: BoxDecoration(
+                    color:
+                        ColorManager.whiteColor, // Set white background color
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  child: CommonTextField(
+                    hinText: StringResources.search,
+                    contentPadding: EdgeInsets.zero,
+                    isLabel: false,
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: ColorManager.grayColor,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.close,
+                        color: ColorManager.grayColor,
+                      ),
+                      onPressed: _toggleSearchBar,
+                    ),
+                  ),
+                )
+              : const SizedBox(),
+        ),
+        if (!_isExpanded)
+          IconButton(
+            icon: Icon(
+              Icons.search,
+              color: ColorManager.grayColor,
+            ),
+            onPressed: _toggleSearchBar,
+          ),
       ],
     );
   }
@@ -196,13 +204,17 @@ class _UserListScreenState extends State<UserListScreen> {
   Widget addNewUserButton() {
     return InkWell(
       borderRadius: BorderRadius.circular(15),
-      onTap: () {},
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const AddNewUserScreen(),
+        ));
+      },
       child: Container(
         height: 50,
         width: screenWidth * 0.3,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
-            color: Colors.white,
+            color: ColorManager.whiteColor,
             boxShadow: [
               BoxShadow(
                   blurRadius: 10,
@@ -210,10 +222,10 @@ class _UserListScreenState extends State<UserListScreen> {
                   offset: const Offset(-0, 1),
                   color: ColorManager.grayColor.withOpacity(0.2))
             ]),
-        child: const Center(
+        child: Center(
             child: Text(
-          "ADD USER",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          StringResources.addTask,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         )),
       ),
     );
