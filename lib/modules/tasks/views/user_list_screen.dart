@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:untitled4/core/values/color_manager.dart';
 import 'package:untitled4/modules/tasks/views/widgets/user_list_tile.dart';
 import '../../../core/values/string_resources.dart';
 import '../../../core/widgets/common_text_field.dart';
-import '../repositories.dart';
+import '../models/task_response_model.dart';
+import '../repositories/task_repository.dart';
+import '../view_models/task_view_model.dart';
 import 'add_new_user_screen.dart';
 
 class UserListScreen extends StatefulWidget {
@@ -80,12 +83,14 @@ class _UserListScreenState extends State<UserListScreen> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      setState(() {
-        startAnimation = true;
+    Future.delayed(Duration.zero, () async {
+      await Provider.of<TaskViewModel>(context, listen: false).getTaskList();
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        setState(() {
+          startAnimation = true;
+        });
       });
     });
-    taskRepository.getCompanyFromServer();
   }
 
   @override
@@ -101,30 +106,33 @@ class _UserListScreenState extends State<UserListScreen> {
   }
 
   Widget bodySection() {
+    var provider = Provider.of<TaskViewModel>(context, listen: true);
     return SafeArea(
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 0),
-        child: Column(
-          children: [
-            ListView.builder(
-              primary: false,
-              shrinkWrap: true,
-              itemCount: texts.length,
-              itemBuilder: (context, index) {
-                return item(index);
-              },
+      child: provider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+              child: Column(
+                children: [
+                  ListView.builder(
+                    primary: false,
+                    shrinkWrap: true,
+                    itemCount: provider.taskList.length,
+                    itemBuilder: (context, index) {
+                      return item(provider.taskList[index], index);
+                    },
+                  ),
+                  const SizedBox(
+                    height: 50,
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(
-              height: 50,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
-  Widget item(int index) {
+  Widget item(taskItem, int index) {
     return AnimatedContainer(
       width: screenWidth,
       curve: Curves.easeInOut,
@@ -140,7 +148,7 @@ class _UserListScreenState extends State<UserListScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
       ),
-      child: const UserListTile(),
+      child: UserListTile(taskItem: taskItem),
     );
   }
 

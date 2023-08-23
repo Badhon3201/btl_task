@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:untitled4/core/values/string_resources.dart';
 
+import '../../models/task_response_model.dart';
+
 class UserListTile extends StatelessWidget {
-  const UserListTile({super.key});
+  const UserListTile({super.key, required this.taskItem});
+  final TaskResponseModel taskItem;
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +25,11 @@ class UserListTile extends StatelessWidget {
       //         "https://cdn-icons-png.flaticon.com/512/2098/2098402.png"),
       //   ),
       // ),
-      title: const Text(
-        "Joe Belfire",
-        style: TextStyle(fontWeight: FontWeight.w700),
+      title:  Text(
+        taskItem.taskName??"",
+        style: const TextStyle(fontWeight: FontWeight.w700),
       ),
-      subtitle: const Text("Software Engineer"),
+      subtitle:  Text(taskItem.taskTitle??""),
       trailing: popupMenu(),
     );
   }
