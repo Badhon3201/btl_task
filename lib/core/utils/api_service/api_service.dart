@@ -16,16 +16,13 @@ class ApiService {
     return httClient!.get(Uri.parse(completeUrl), headers: headers);
   }
 
-  Future<http.Response> postRequest(String url, Map<String, dynamic> body,
-      {Duration? timeout, bool checkAccessValidity = true}) async {
+  Future<http.Response> postRequest(
+      String url, Map<String, dynamic> body) async {
     var completeUrl = url;
     debugPrint("Checking for Post API start & end point $completeUrl");
     var headers = {'Content-Type': 'application/json'};
     var encodedBody = json.encode(body);
-    if (checkAccessValidity) {
-      return httClient!
-          .post(Uri.parse(completeUrl), headers: headers, body: encodedBody);
-    }
+
     return httClient!
         .post(Uri.parse(completeUrl), headers: headers, body: encodedBody);
   }

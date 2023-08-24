@@ -1,3 +1,5 @@
+import 'package:flutter/src/widgets/framework.dart';
+
 class StringResources {
   static String addTask = "Add Task";
   static String editTask = "Edit Task";
@@ -11,5 +13,9 @@ class StringResources {
   static String edit = "Edit";
 
   static String search = "Search";
+
+  static String requiredText = "This field is required";
+
+  static var viewTask = "View Task";
 
 }

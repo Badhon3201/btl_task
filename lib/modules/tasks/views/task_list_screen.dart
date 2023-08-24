@@ -4,90 +4,35 @@ import 'package:untitled4/core/values/color_manager.dart';
 import 'package:untitled4/modules/tasks/views/widgets/user_list_tile.dart';
 import '../../../core/values/string_resources.dart';
 import '../../../core/widgets/common_text_field.dart';
+import '../../../main.dart';
 import '../models/task_response_model.dart';
 import '../repositories/task_repository.dart';
 import '../view_models/task_view_model.dart';
-import 'add_new_user_screen.dart';
+import 'add_new_task_screen.dart';
 
-class UserListScreen extends StatefulWidget {
-  const UserListScreen({Key? key}) : super(key: key);
+class TaskListScreen extends StatefulWidget {
+  const TaskListScreen({Key? key}) : super(key: key);
 
   @override
-  State<UserListScreen> createState() => _UserListScreenState();
+  State<TaskListScreen> createState() => _TaskListScreenState();
 }
 
-class _UserListScreenState extends State<UserListScreen> {
-  TaskRepository taskRepository = TaskRepository();
-  bool isSearch = false;
-  double screenHeight = 0;
-  double screenWidth = 0;
-
-  bool startAnimation = false;
-  bool startAnimationSearch = false;
-
-  bool _isExpanded = false;
-
-  void _toggleSearchBar() {
-    setState(() {
-      _isExpanded = !_isExpanded;
-    });
-  }
-
-  List<String> texts = [
-    "Monetization",
-    "Pie Chart",
-    "Flag",
-    "Notification",
-    "Savings",
-    "Cloud",
-    "Nightlight",
-    "Assignment",
-    "Location",
-    "Settings",
-    "Rocket",
-    "Backpack",
-    "Person",
-    "Done All",
-    "Search",
-    "Extension",
-    "Bluetooth",
-    "Favorite",
-    "Lock",
-    "Bookmark",
-  ];
-
-  List<IconData> icons = [
-    Icons.monetization_on,
-    Icons.pie_chart,
-    Icons.flag,
-    Icons.notifications,
-    Icons.savings,
-    Icons.cloud,
-    Icons.nightlight_round,
-    Icons.assignment,
-    Icons.location_pin,
-    Icons.settings,
-    Icons.rocket,
-    Icons.backpack,
-    Icons.person,
-    Icons.done_all,
-    Icons.search,
-    Icons.extension,
-    Icons.bluetooth,
-    Icons.favorite,
-    Icons.lock,
-    Icons.bookmark,
-  ];
+class _TaskListScreenState extends State<TaskListScreen> {
+  var providers = Provider.of<TaskViewModel>(navigatorKey.currentState!.context,
+      listen: false);
+  var screenHeight =
+      MediaQuery.of(navigatorKey.currentState!.context).size.height;
+  var screenWidth =
+      MediaQuery.of(navigatorKey.currentState!.context).size.width;
 
   @override
   void initState() {
     super.initState();
-
     Future.delayed(Duration.zero, () async {
-      await Provider.of<TaskViewModel>(context, listen: false).getTaskList();
+      await providers.getTaskList();
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         setState(() {
-          startAnimation = true;
+          providers.startAnimation = true;
         });
       });
     });
@@ -95,9 +40,6 @@ class _UserListScreenState extends State<UserListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    screenHeight = MediaQuery.of(context).size.height;
-    screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       appBar: appbar(),
       body: bodySection(),
@@ -133,12 +75,14 @@ class _UserListScreenState extends State<UserListScreen> {
   }
 
   Widget item(taskItem, int index) {
+    var screenWidth = MediaQuery.of(context).size.width;
+    var provider = Provider.of<TaskViewModel>(context, listen: true);
     return AnimatedContainer(
       width: screenWidth,
       curve: Curves.easeInOut,
       duration: Duration(milliseconds: 300 + (index * 100)),
-      transform:
-          Matrix4.translationValues(startAnimation ? 0 : screenWidth, 0, 0),
+      transform: Matrix4.translationValues(
+          provider.startAnimation ? 0 : screenWidth, 0, 0),
       margin: const EdgeInsets.only(
         bottom: 12,
       ),
@@ -153,10 +97,11 @@ class _UserListScreenState extends State<UserListScreen> {
   }
 
   PreferredSizeWidget appbar() {
+    var provider = Provider.of<TaskViewModel>(context, listen: true);
     return AppBar(
       backgroundColor: ColorManager.whiteColor,
       elevation: 0,
-      title: _isExpanded
+      title: provider.isExpanded
           ? null
           : Text(
               StringResources.task,
@@ -168,10 +113,10 @@ class _UserListScreenState extends State<UserListScreen> {
       actions: [
         AnimatedContainer(
           duration: const Duration(milliseconds: 500),
-          width: _isExpanded ? screenWidth : 0.0,
+          width: provider.isExpanded ? screenWidth : 0.0,
           padding: const EdgeInsets.symmetric(horizontal: 5.0),
           margin: const EdgeInsets.symmetric(vertical: 5),
-          child: _isExpanded
+          child: provider.isExpanded
               ? Container(
                   decoration: BoxDecoration(
                     color:
@@ -191,19 +136,19 @@ class _UserListScreenState extends State<UserListScreen> {
                         Icons.close,
                         color: ColorManager.grayColor,
                       ),
-                      onPressed: _toggleSearchBar,
+                      onPressed: provider.toggleSearchBar,
                     ),
                   ),
                 )
               : const SizedBox(),
         ),
-        if (!_isExpanded)
+        if (!provider.isExpanded)
           IconButton(
             icon: Icon(
               Icons.search,
               color: ColorManager.grayColor,
             ),
-            onPressed: _toggleSearchBar,
+            onPressed: provider.toggleSearchBar,
           ),
       ],
     );
@@ -213,9 +158,11 @@ class _UserListScreenState extends State<UserListScreen> {
     return InkWell(
       borderRadius: BorderRadius.circular(15),
       onTap: () {
+        providers.clearData();
         Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const AddNewUserScreen(),
+          builder: (context) =>  AddNewTaskScreen(screenNavigator: "Add"),
         ));
+        Navigator.pushNamed(context, "routeName", arguments: {"add": "add"});
       },
       child: Container(
         height: 50,
