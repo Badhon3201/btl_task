@@ -1,6 +1,4 @@
-
-
-import 'package:untitled4/core/utils/failure/failure.dart';
+import 'failure.dart';
 
 class ServerExceptions implements Failure {}
 

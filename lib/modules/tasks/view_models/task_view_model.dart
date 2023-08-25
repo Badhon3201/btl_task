@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import '../../../core/utils/failure/app_error.dart';
 import '../../../main.dart';
 import '../models/task_response_model.dart';
 import '../repositories/task_repository.dart';
@@ -15,16 +16,19 @@ class TaskViewModel extends ChangeNotifier {
   bool isSearch = false;
   double screenHeight = 0;
   double screenWidth = 0;
-  var isChecked = false;
   var formKey = GlobalKey<FormState>();
-
+  late AppError _appError;
   bool startAnimation = false;
   bool startAnimationSearch = false;
 
   bool isExpanded = false;
 
+  var searchController = TextEditingController();
+
   void toggleSearchBar() {
     isExpanded = !isExpanded;
+    searchController.clear();
+    getTaskList();
     notifyListeners();
   }
 
@@ -37,12 +41,19 @@ class TaskViewModel extends ChangeNotifier {
 
   getTaskList() async {
     isLoading = true;
-    var response = await taskRepository.getTaskList();
+    notifyListeners();
+    var response = await taskRepository.getTaskList(searchController.text);
 
-    response.fold((l) => null, (r) {
+    response.fold((l) {
+      isLoading = false;
+      _appError = l;
+      notifyListeners();
+    }, (r) {
+      taskList.clear();
       taskList.addAll(r);
+      isLoading = false;
+      notifyListeners();
     });
-    isLoading = false;
     notifyListeners();
   }
 
@@ -54,7 +65,10 @@ class TaskViewModel extends ChangeNotifier {
         taskDescriptionController.text,
         completeStatus);
 
-    response.fold((l) => null, (r) {
+    response.fold((l) {
+      _appError = l;
+      notifyListeners();
+    }, (r) {
       addTaskResponse = r;
       Navigator.pop(navigatorKey.currentState!.context);
       taskList.add(r);
@@ -73,7 +87,10 @@ class TaskViewModel extends ChangeNotifier {
         taskDescriptionController.text,
         completeStatus);
 
-    response.fold((l) => null, (r) {
+    response.fold((l) {
+      _appError = l;
+      notifyListeners();
+    }, (r) {
       addTaskResponse = r;
       Navigator.pop(navigatorKey.currentState!.context);
       taskList.clear();
@@ -83,4 +100,27 @@ class TaskViewModel extends ChangeNotifier {
     isLoading = false;
     notifyListeners();
   }
+
+  deleteTask(int id) async {
+    isLoading = true;
+    var response = await taskRepository.deleteTask(id);
+
+    response.fold((l) {
+      _appError = l;
+    }, (r) async {
+      taskList.clear();
+      await getTaskList();
+    });
+    isLoading = false;
+  }
+
+  void getDataController(addTaskResponse) {
+    taskTitleController.text = addTaskResponse?.taskTitle ?? "";
+    taskNameController.text = addTaskResponse?.taskName ?? "";
+    taskDescriptionController.text = addTaskResponse?.taskDescription ?? "";
+    completeStatus = addTaskResponse?.completeStatus ?? false;
+  }
+
+
+  AppError get appError => _appError;
 }

@@ -1,12 +1,11 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:untitled4/core/values/string_resources.dart';
-import 'package:untitled4/modules/tasks/view_models/task_view_model.dart';
-
+import '../../../../core/values/string_resources.dart';
 import '../../../../main.dart';
 import '../../models/task_response_model.dart';
-import '../add_new_task_screen.dart';
+import '../../models/task_screen_arg.dart';
+import '../../view_models/task_view_model.dart';
 
 class UserListTile extends StatelessWidget {
   const UserListTile({super.key, required this.taskItem});
@@ -16,7 +15,10 @@ class UserListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onTap: () {},
+      onTap: () {
+        Navigator.pushNamed(navigatorKey.currentState!.context,
+            "/${StringResources.detailsRoutes}", arguments: TaskScreenArguments(screenNavigator: StringResources.viewTask,taskItem: taskItem));
+      },
       leading: Image.network(
         "https://cdn-icons-png.flaticon.com/512/2098/2098402.png",
         height: 40,
@@ -37,11 +39,8 @@ class UserListTile extends StatelessWidget {
       onSelected: (String item) {
         selectedMenu = item;
         if (selectedMenu == StringResources.edit) {
-          Navigator.of(navigatorKey.currentState!.context)
-              .push(MaterialPageRoute(
-            builder: (context) =>
-                AddNewTaskScreen(screenNavigator: "edit", taskItem: taskItem),
-          ));
+          Navigator.pushNamed(navigatorKey.currentState!.context,
+              "/${StringResources.detailsRoutes}", arguments: TaskScreenArguments(screenNavigator: StringResources.editTask,taskItem: taskItem));
         } else {
           showAlertDialog(int.parse(taskItem.id!));
         }
@@ -65,11 +64,11 @@ class UserListTile extends StatelessWidget {
       dialogType: DialogType.WARNING,
       animType: AnimType.BOTTOMSLIDE,
       title: 'Delete?',
-      desc: 'Are you sure you want to delete this item?',
+      desc: 'Are you sure you want to delete this task?',
       btnCancelOnPress: () {},
       btnOkOnPress: () {
-        Provider.of<TaskViewModel>(navigatorKey.currentState!.context)
-            .updateTask(id);
+        Provider.of<TaskViewModel>(navigatorKey.currentState!.context,listen: false)
+            .deleteTask(id);
       },
     ).show();
   }

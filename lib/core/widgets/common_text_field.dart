@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:untitled4/core/values/color_manager.dart';
+
+import '../utils/styles.dart';
+import '../values/color_manager.dart';
 
 class CommonTextField extends StatelessWidget {
   final String? hinText;
@@ -16,6 +18,7 @@ class CommonTextField extends StatelessWidget {
   FormFieldValidator<String>? validator;
   final TextInputType? keyboardType;
   final VoidCallback? onTap;
+  void Function(String)? onFieldSubmitted;
   bool? isFilled = false;
 
   CommonTextField({
@@ -28,6 +31,7 @@ class CommonTextField extends StatelessWidget {
     this.validator,
     this.labelText,
     this.readOnly = false,
+    this.onFieldSubmitted,
     this.keyboardType,
     this.obscureText,
     this.focusNode,
@@ -46,23 +50,20 @@ class CommonTextField extends StatelessWidget {
       controller: controller,
       maxLines: maxLine,
       onTap: onTap,
+      onFieldSubmitted: onFieldSubmitted,
 
       decoration: InputDecoration(
         hintText: hinText,
-        hintStyle: TextStyle(
-            fontWeight: FontWeight.w500, color: ColorManager.grayColor),
+        hintStyle: TextStyles.hintStyle,
         labelText: labelText,
-        labelStyle: TextStyle(
-            color: ColorManager.grayColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 13),
+        labelStyle: TextStyles.grayBoldStyle,
         suffixIcon: suffixIcon,
         prefixIcon: prefixIcon,
         fillColor: const Color(0XFFF6F6F6),
-        floatingLabelStyle: TextStyle(
-            color: ColorManager.grayColor, fontWeight: FontWeight.bold),
+        floatingLabelStyle: TextStyles.grayBoldStyle,
         filled: isFilled,
-        contentPadding: contentPadding?? EdgeInsets.fromLTRB(20.0, 20, 20.0, 20),
+        contentPadding:
+            contentPadding ?? const EdgeInsets.fromLTRB(20.0, 20, 20.0, 20),
         focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(25),
             borderSide: BorderSide(

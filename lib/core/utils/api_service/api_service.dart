@@ -36,4 +36,12 @@ class ApiService {
     return httClient!
         .put(Uri.parse(completeUrl), headers: headers, body: encodedBody);
   }
+
+  Future<http.Response> deleteRequest(String url) async {
+    var headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+    };
+
+    return httClient!.delete(Uri.parse(url), headers: headers);
+  }
 }

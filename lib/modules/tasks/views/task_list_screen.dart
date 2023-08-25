@@ -1,14 +1,13 @@
+import 'package:btl_task/core/utils/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:untitled4/core/values/color_manager.dart';
-import 'package:untitled4/modules/tasks/views/widgets/user_list_tile.dart';
+import '../../../core/values/color_manager.dart';
 import '../../../core/values/string_resources.dart';
 import '../../../core/widgets/common_text_field.dart';
 import '../../../main.dart';
-import '../models/task_response_model.dart';
-import '../repositories/task_repository.dart';
+import '../models/task_screen_arg.dart';
 import '../view_models/task_view_model.dart';
-import 'add_new_task_screen.dart';
+import 'widgets/user_list_tile.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({Key? key}) : super(key: key);
@@ -18,8 +17,6 @@ class TaskListScreen extends StatefulWidget {
 }
 
 class _TaskListScreenState extends State<TaskListScreen> {
-  var providers = Provider.of<TaskViewModel>(navigatorKey.currentState!.context,
-      listen: false);
   var screenHeight =
       MediaQuery.of(navigatorKey.currentState!.context).size.height;
   var screenWidth =
@@ -29,10 +26,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () async {
-      await providers.getTaskList();
+      var provider = Provider.of<TaskViewModel>(
+          navigatorKey.currentState!.context,
+          listen: false);
+      await provider.getTaskList();
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         setState(() {
-          providers.startAnimation = true;
+          provider.startAnimation = true;
         });
       });
     });
@@ -40,43 +40,34 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<TaskViewModel>(context);
     return Scaffold(
-      appBar: appbar(),
-      body: bodySection(),
-      floatingActionButton: addNewUserButton(),
+      appBar: appbar(provider),
+      body: bodySection(provider),
+      floatingActionButton: addNewUserButton(provider),
     );
   }
 
-  Widget bodySection() {
-    var provider = Provider.of<TaskViewModel>(context, listen: true);
+  Widget bodySection(TaskViewModel provider) {
     return SafeArea(
-      child: provider.isLoading
+      child: provider.isLoading==true
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 0),
-              child: Column(
-                children: [
-                  ListView.builder(
-                    primary: false,
-                    shrinkWrap: true,
-                    itemCount: provider.taskList.length,
-                    itemBuilder: (context, index) {
-                      return item(provider.taskList[index], index);
-                    },
-                  ),
-                  const SizedBox(
-                    height: 50,
-                  ),
-                ],
-              ),
-            ),
+          : provider.taskList.isEmpty
+              ? Center(
+                  child: Text(StringResources.noDatFound),
+                )
+              : ListView.builder(
+                  primary: false,
+                  shrinkWrap: true,
+                  itemCount: provider.taskList.length,
+                  itemBuilder: (context, index) {
+                    return item(provider.taskList[index], index, provider);
+                  },
+                ),
     );
   }
 
-  Widget item(taskItem, int index) {
-    var screenWidth = MediaQuery.of(context).size.width;
-    var provider = Provider.of<TaskViewModel>(context, listen: true);
+  Widget item(taskItem, int index, TaskViewModel provider) {
     return AnimatedContainer(
       width: screenWidth,
       curve: Curves.easeInOut,
@@ -96,19 +87,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
-  PreferredSizeWidget appbar() {
-    var provider = Provider.of<TaskViewModel>(context, listen: true);
+  PreferredSizeWidget appbar(TaskViewModel provider) {
     return AppBar(
       backgroundColor: ColorManager.whiteColor,
+      automaticallyImplyLeading: false,
       elevation: 0,
       title: provider.isExpanded
           ? null
           : Text(
               StringResources.task,
-              style: TextStyle(
-                color: ColorManager.grayColor,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyles.grayBoldStyle,
             ),
       actions: [
         AnimatedContainer(
@@ -126,6 +114,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   child: CommonTextField(
                     hinText: StringResources.search,
                     contentPadding: EdgeInsets.zero,
+                    controller: provider.searchController,
+                    onTap: (){
+                      provider.searchController.text.isNotEmpty?provider.getTaskList():null;
+                    },
+                    onFieldSubmitted:(String v){
+                      provider.searchController.text.isNotEmpty?provider.getTaskList():null;
+                    },
                     isLabel: false,
                     prefixIcon: Icon(
                       Icons.search,
@@ -154,15 +149,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
-  Widget addNewUserButton() {
+  Widget addNewUserButton(TaskViewModel provider) {
     return InkWell(
       borderRadius: BorderRadius.circular(15),
       onTap: () {
-        providers.clearData();
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) =>  AddNewTaskScreen(screenNavigator: "Add"),
-        ));
-        Navigator.pushNamed(context, "routeName", arguments: {"add": "add"});
+        provider.clearData();
+        Navigator.pushNamed(context, "/${StringResources.detailsRoutes}",
+            arguments:
+                TaskScreenArguments(screenNavigator: StringResources.addTask));
       },
       child: Container(
         height: 50,
