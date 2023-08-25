@@ -11,9 +11,8 @@ add new task screen
 Delete item task screen
 ![Simulator Screenshot - iPhone 14 Pro Max - 2023-08-25 at 02 26 44](https://github.com/Badhon3201/temp_mail/assets/49567193/d17982b6-16c3-4f58-b2bb-4cfd41af2a5d)
 
-Edit task screen
-![Simulator Screenshot - iPhone 14 Pro Max - 2023-08-25 at 02 26 13](https://github.com/Badhon3201/temp_mail/assets/49567193/f4f7fe3d-aafd-47fa-9b52-812ca6a9a2b6)
-b-44ad13a27f4b)
+View task screen
+![Simulator Screenshot - iPhone 14 Pro Max - 2023-08-25 at 13 10 06](https://github.com/Badhon3201/temp_mail/assets/49567193/f0217ed4-7c4a-49aa-8910-20ef35f9ddec)
 
 Splash screen
 ![Simulator Screenshot - iPhone 14 Pro Max - 2023-08-25 at 02 27 18](https://github.com/Badhon3201/temp_mail/assets/49567193/be7c4310-e52a-4e9c-8536-e3d9fcef7600)
